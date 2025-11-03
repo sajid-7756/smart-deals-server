@@ -76,7 +76,7 @@ async function run() {
       const cursor = productsCollection
         .find()
         .sort({
-          created_at: 1,
+          created_at: -1,
         })
         .limit(6)
         .project(projectFields);
@@ -87,7 +87,7 @@ async function run() {
 
     app.get("/products/:id", async (req, res) => {
       const id = req.params.id;
-      const query = { _id: id };
+      const query = { _id: new ObjectId(id) };
       const result = await productsCollection.findOne(query);
       res.send(result);
     });
@@ -145,19 +145,6 @@ async function run() {
       const productId = req.params.productId;
       const query = { product: productId };
       const cursor = bidsCollection.find(query).sort({ bid_price: -1 });
-      const result = await cursor.toArray();
-      res.send(result);
-    });
-
-    app.get("/bids", async (req, res) => {
-      const query = {};
-
-      if (query.email) {
-        query.buyer_email = email;
-      }
-      console.log(query.email);
-
-      const cursor = bidsCollection.find(query);
       const result = await cursor.toArray();
       res.send(result);
     });
