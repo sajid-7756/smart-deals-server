@@ -3,7 +3,7 @@ const cors = require("cors");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 require("dotenv").config();
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 5000;
 
 //middleware
 app.use(cors());
@@ -36,12 +36,11 @@ async function run() {
     app.post("/users", async (req, res) => {
       const newUser = req.body;
       const email = newUser.email;
-
       const query = { email };
-      const existingUser = await usersCollection.findOne(query);
+      const existingUser = await usersCollection.insertOne(query);
 
       if (existingUser) {
-        return res.send({ message: "User already exist" });
+        return res.send({ message: "User already exists" });
       }
       const result = await usersCollection.insertOne(newUser);
       res.send(result);
@@ -56,8 +55,9 @@ async function run() {
       //   .skip(1) //skip first 1 data
       //   .limit(5) // limiting data only first 5 data will exist
       //   .project(projectFields); // only project fields exits no more property
-
+      console.log(req.query.email);
       const email = req.query.email;
+
       const query = {};
 
       if (email) {
@@ -65,7 +65,6 @@ async function run() {
       }
 
       const cursor = productsCollection.find(query);
-
       const result = await cursor.toArray();
       res.send(result);
     });
@@ -75,10 +74,8 @@ async function run() {
 
       const cursor = productsCollection
         .find()
-        .sort({
-          created_at: -1,
-        })
         .limit(6)
+        .sort({ created_at: -1 })
         .project(projectFields);
 
       const result = await cursor.toArray();
@@ -123,8 +120,8 @@ async function run() {
     //bids related apis
     app.get("/bids", async (req, res) => {
       const email = req.query.email;
-      const query = {};
 
+      const query = {};
       if (email) {
         query.buyer_email = email;
       }
